@@ -41,9 +41,12 @@ public class UnifizeEcommerceDiscountApplication implements CommandLineRunner {
                 testCart, testCustomer, Optional.of(iciciPayment));
 
         try {
-            boolean super20Voucher = discountService.validateDiscountCode("SUPER20", testCart, testCustomer);
-            if (super20Voucher) {
-                result.setFinalPrice(result.getFinalPrice().multiply(BigDecimal.valueOf(0.20)));
+            boolean super29Voucher = discountService.validateDiscountCode("SUPER29", testCart, testCustomer);
+            if (super29Voucher) {
+                System.out.println("Voucher is Valid");
+                BigDecimal voucherDiscount = result.getFinalPrice().multiply(BigDecimal.valueOf(0.29));
+                System.out.println("Voucher is Valid and you got a discount of : ₹" + voucherDiscount);
+                result.setFinalPrice(result.getFinalPrice().subtract(voucherDiscount));
             }
         } catch (DiscountValidationException ex) {
             System.out.println("Discount code validation failed: " + ex.getMessage());
