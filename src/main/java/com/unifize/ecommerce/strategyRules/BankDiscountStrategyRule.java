@@ -1,5 +1,6 @@
 package com.unifize.ecommerce.strategyRules;
 
+import com.unifize.ecommerce.constants.DiscountConstants;
 import com.unifize.ecommerce.model.CartItem;
 import com.unifize.ecommerce.model.CustomerProfile;
 import com.unifize.ecommerce.model.PaymentInfo;
@@ -17,8 +18,8 @@ public class BankDiscountStrategyRule implements DiscountStrategyRule{
                             Optional<PaymentInfo> paymentInfo,
                             BigDecimal currentTotal,
                             Map<String, BigDecimal> appliedDiscounts) {
-        if (paymentInfo.isPresent() && "ICICI".equalsIgnoreCase(paymentInfo.get().getBankName())) {
-            BigDecimal discount = currentTotal.multiply(BigDecimal.valueOf(0.10));
+        if (paymentInfo.isPresent() && DiscountConstants.ICICI_BANK.equalsIgnoreCase(paymentInfo.get().getBankName())) {
+            BigDecimal discount = currentTotal.multiply(BigDecimal.valueOf(DiscountConstants.ICICI_DISCOUNT_PERCENT));
             appliedDiscounts.merge("ICICI Bank Offer", discount, BigDecimal::add);
             return currentTotal.subtract(discount);
         }

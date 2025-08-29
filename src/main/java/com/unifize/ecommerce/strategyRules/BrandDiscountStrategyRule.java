@@ -1,5 +1,6 @@
 package com.unifize.ecommerce.strategyRules;
 
+import com.unifize.ecommerce.constants.DiscountConstants;
 import com.unifize.ecommerce.model.CartItem;
 import com.unifize.ecommerce.model.CustomerProfile;
 import com.unifize.ecommerce.model.PaymentInfo;
@@ -15,10 +16,10 @@ public class BrandDiscountStrategyRule implements DiscountStrategyRule{
         BigDecimal discountTotal = BigDecimal.ZERO;
 
         for(CartItem item : cartItems) {
-            if ("PUMA".equalsIgnoreCase(item.getProduct().getBrand())) {
+            if (DiscountConstants.PUMA.equalsIgnoreCase(item.getProduct().getBrand())) {
                 BigDecimal itemTotal = item.getProduct().getBasePrice()
                         .multiply(BigDecimal.valueOf(item.getQuantity()));
-                BigDecimal discount = itemTotal.multiply(BigDecimal.valueOf(0.40));
+                BigDecimal discount = itemTotal.multiply(BigDecimal.valueOf(DiscountConstants.PUMA_DISCOUNT_PERCENT));
                 discountTotal = discountTotal.add(discount);
             }
         }

@@ -3,7 +3,6 @@ package com.unifize.ecommerce.config;
 import com.unifize.ecommerce.model.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 
 import java.math.BigDecimal;

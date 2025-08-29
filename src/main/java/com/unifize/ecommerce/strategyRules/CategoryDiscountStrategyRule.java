@@ -1,5 +1,6 @@
 package com.unifize.ecommerce.strategyRules;
 
+import com.unifize.ecommerce.constants.DiscountConstants;
 import com.unifize.ecommerce.model.CartItem;
 import com.unifize.ecommerce.model.CustomerProfile;
 import com.unifize.ecommerce.model.PaymentInfo;
@@ -15,10 +16,10 @@ public class CategoryDiscountStrategyRule implements DiscountStrategyRule{
         BigDecimal discountTotal = BigDecimal.ZERO;
 
         for (CartItem item : cartItems) {
-            if ("T-SHIRT".equalsIgnoreCase(item.getProduct().getCategory())) {
+            if (DiscountConstants.CATEGORY_TSHIRT.equalsIgnoreCase(item.getProduct().getCategory())) {
                 BigDecimal itemTotal = item.getProduct().getBasePrice()
                         .multiply(BigDecimal.valueOf(item.getQuantity()));
-                BigDecimal discount = itemTotal.multiply(BigDecimal.valueOf(0.10));
+                BigDecimal discount = itemTotal.multiply(BigDecimal.valueOf(DiscountConstants.TSHIRT_DISCOUNT_PERCENT));
                 discountTotal = discountTotal.add(discount);
             }
         }
