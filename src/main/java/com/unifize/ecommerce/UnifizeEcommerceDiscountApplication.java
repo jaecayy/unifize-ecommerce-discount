@@ -1,14 +1,13 @@
 package com.unifize.ecommerce;
 
-import com.unifize.ecommerce.model.CartItem;
-import com.unifize.ecommerce.model.CustomerProfile;
-import com.unifize.ecommerce.model.DiscountedPrice;
-import com.unifize.ecommerce.model.PaymentInfo;
+import com.unifize.ecommerce.exception.DiscountValidationException;
+import com.unifize.ecommerce.model.*;
 import com.unifize.ecommerce.service.DiscountService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +39,15 @@ public class UnifizeEcommerceDiscountApplication implements CommandLineRunner {
 
         DiscountedPrice result = discountService.calculateCartDiscounts(
                 testCart, testCustomer, Optional.of(iciciPayment));
+
+        try {
+            boolean super20Voucher = discountService.validateDiscountCode("SUPER20", testCart, testCustomer);
+            if (super20Voucher) {
+                result.setFinalPrice(result.getFinalPrice().multiply(BigDecimal.valueOf(0.20)));
+            }
+        } catch (DiscountValidationException ex) {
+            System.out.println("Discount code validation failed: " + ex.getMessage());
+        }
 
         System.out.println("Original Price: ₹" + result.getOriginalPrice());
         System.out.println("Final Price   : ₹" + result.getFinalPrice());

@@ -1,27 +1,32 @@
 package com.unifize.ecommerce.service.impl;
 
 import com.unifize.ecommerce.exception.DiscountCalculationException;
+import com.unifize.ecommerce.exception.DiscountValidationException;
 import com.unifize.ecommerce.model.*;
+import com.unifize.ecommerce.repository.VoucherRepository;
 import com.unifize.ecommerce.service.DiscountService;
 import com.unifize.ecommerce.strategyRules.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
 public class DiscountServiceImpl implements DiscountService {
 
     private final List<DiscountStrategyRule> discountRules;
+    private final VoucherRepository voucherRepository;
 
-    public DiscountServiceImpl() {
+    public DiscountServiceImpl(VoucherRepository voucherRepository) {
         this.discountRules = List.of(
                 new BrandDiscountStrategyRule(),
                 new CategoryDiscountStrategyRule(),
-                new VoucherDiscountStrategyRule("SUPER29"),
                 new BankDiscountStrategyRule()
         );
+
+        this.voucherRepository = voucherRepository;
     }
 
     @Override
@@ -58,6 +63,15 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public boolean validateDiscountCode(String code, List<CartItem> cartItems, CustomerProfile customer) {
-        return "SUPER29".equalsIgnoreCase(code);
+        return voucherRepository.findByCode(code).map(v -> {
+            if (v.getExpiry() != null && v.getExpiry().isBefore(LocalDate.now())) {
+                throw new DiscountValidationException("Voucher expired");
+            }
+            if (v.getMinCustomerTier() != null &&
+                    !v.getMinCustomerTier().equalsIgnoreCase(customer.getTier())) {
+                throw new DiscountValidationException("Voucher not valid for the customer tier");
+            }
+            return true;
+        }).orElseThrow(() -> new DiscountValidationException("Invalid voucher code"));
     }
 }
