@@ -3,17 +3,26 @@ package com.unifize.ecommerce.service.impl;
 import com.unifize.ecommerce.exception.DiscountCalculationException;
 import com.unifize.ecommerce.model.*;
 import com.unifize.ecommerce.service.DiscountService;
+import com.unifize.ecommerce.strategyRules.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class DiscountServiceImpl implements DiscountService {
+
+    private final List<DiscountStrategyRule> discountRules;
+
+    public DiscountServiceImpl() {
+        this.discountRules = List.of(
+                new BrandDiscountStrategyRule(),
+                new CategoryDiscountStrategyRule(),
+                new VoucherDiscountStrategyRule("SUPER29"),
+                new BankDiscountStrategyRule()
+        );
+    }
 
     @Override
     public DiscountedPrice calculateCartDiscounts(List<CartItem> cartItems,
@@ -22,7 +31,7 @@ public class DiscountServiceImpl implements DiscountService {
         try {
             BigDecimal originalTotal = BigDecimal.ZERO;
             BigDecimal finalTotal = BigDecimal.ZERO;
-            Map<String, BigDecimal> appliedDiscounts = new HashMap<>();
+            Map<String, BigDecimal> appliedDiscounts = new LinkedHashMap<>();
 
             for (CartItem item : cartItems) {
                 BigDecimal itemPrice = item.getProduct().getBasePrice()
@@ -31,41 +40,8 @@ public class DiscountServiceImpl implements DiscountService {
             }
             finalTotal = originalTotal;
 
-            for (CartItem item : cartItems) {
-                if ("PUMA".equalsIgnoreCase(item.getProduct().getBrand())) {
-                    BigDecimal itemTotal = item.getProduct().getBasePrice()
-                            .multiply(BigDecimal.valueOf(item.getQuantity()));
-                    BigDecimal discount = itemTotal.multiply(BigDecimal.valueOf(0.40));
-                    finalTotal = finalTotal.subtract(discount);
-                    appliedDiscounts.put("PUMA Brand Discount", discount);
-                }
-            }
-
-            for (CartItem item : cartItems) {
-                if ("T-SHIRT".equalsIgnoreCase(item.getProduct().getCategory())) {
-                    BigDecimal itemTotal = item.getProduct().getBasePrice()
-                            .multiply(BigDecimal.valueOf(item.getQuantity()));
-                    BigDecimal discount = itemTotal.multiply(BigDecimal.valueOf(0.10));
-                    finalTotal = finalTotal.subtract(discount);
-                    appliedDiscounts.put("T-Shirt Category Discount", discount);
-                }
-            }
-
-            for(CartItem item : cartItems) {
-                if(BrandTier.PREMIUM.equals(item.getProduct().getBrandTier())) {
-                    BigDecimal itemTotal = item.getProduct().getBasePrice()
-                            .multiply(BigDecimal.valueOf(item.getQuantity()));
-                    BigDecimal voucherDiscount = itemTotal.multiply(BigDecimal.valueOf(0.29));
-                    finalTotal = finalTotal.subtract(voucherDiscount);
-                    appliedDiscounts.put("Premium Brand Voucher SUPER69", voucherDiscount);
-
-                }
-            }
-
-            if (paymentInfo.isPresent() && "ICICI".equalsIgnoreCase(paymentInfo.get().getBankName())) {
-                BigDecimal bankDiscount = finalTotal.multiply(BigDecimal.valueOf(0.10));
-                finalTotal = finalTotal.subtract(bankDiscount);
-                appliedDiscounts.put("ICICI Bank Offer", bankDiscount);
+            for (DiscountStrategyRule rule : discountRules) {
+                finalTotal = rule.apply(cartItems, customer, paymentInfo, finalTotal, appliedDiscounts);
             }
 
             return DiscountedPrice.builder()
@@ -82,6 +58,6 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public boolean validateDiscountCode(String code, List<CartItem> cartItems, CustomerProfile customer) {
-        return "SUPER69".equalsIgnoreCase(code);
+        return "SUPER29".equalsIgnoreCase(code);
     }
 }
