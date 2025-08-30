@@ -18,9 +18,9 @@ public class BankDiscountStrategyRule implements DiscountStrategyRule{
                             Optional<PaymentInfo> paymentInfo,
                             BigDecimal currentTotal,
                             Map<String, BigDecimal> appliedDiscounts) {
-        if (paymentInfo.isPresent() && DiscountConstants.ICICI_BANK.equalsIgnoreCase(paymentInfo.get().getBankName())) {
-            BigDecimal discount = currentTotal.multiply(BigDecimal.valueOf(DiscountConstants.ICICI_DISCOUNT_PERCENT));
-            appliedDiscounts.merge("ICICI Bank Offer", discount, BigDecimal::add);
+        if (paymentInfo.isPresent() && DiscountConstants.BANK_DISCOUNTS.containsKey(paymentInfo.get().getBankName().toUpperCase())) {
+            BigDecimal discount = currentTotal.multiply(BigDecimal.valueOf(DiscountConstants.BANK_DISCOUNTS.get(paymentInfo.get().getBankName().toUpperCase())));
+            appliedDiscounts.merge(paymentInfo.get().getBankName().toUpperCase()+" Bank Offer", discount, BigDecimal::add);
             return currentTotal.subtract(discount);
         }
         return currentTotal;

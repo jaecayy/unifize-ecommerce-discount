@@ -11,7 +11,8 @@ public interface DiscountService {
     DiscountedPrice calculateCartDiscounts(
             List<CartItem> cartItems,
             CustomerProfile customer,
-            Optional<PaymentInfo> paymentInfo
+            Optional<PaymentInfo> paymentInfo,
+            String voucherCode
     ) throws DiscountCalculationException;
 
     boolean validateDiscountCode(

@@ -32,7 +32,8 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     public DiscountedPrice calculateCartDiscounts(List<CartItem> cartItems,
                                                   CustomerProfile customer,
-                                                  Optional<PaymentInfo> paymentInfo) {
+                                                  Optional<PaymentInfo> paymentInfo,
+                                                  String voucherCode) {
         try {
             BigDecimal originalTotal = BigDecimal.ZERO;
             BigDecimal finalTotal = BigDecimal.ZERO;
@@ -47,6 +48,11 @@ public class DiscountServiceImpl implements DiscountService {
 
             for (DiscountStrategyRule rule : discountRules) {
                 finalTotal = rule.apply(cartItems, customer, paymentInfo, finalTotal, appliedDiscounts);
+            }
+
+            if (voucherCode != null) {
+                finalTotal = new VoucherDiscountStrategyRule(voucherCode, voucherRepository)
+                        .apply(cartItems, customer, paymentInfo, finalTotal, appliedDiscounts);
             }
 
             return DiscountedPrice.builder()

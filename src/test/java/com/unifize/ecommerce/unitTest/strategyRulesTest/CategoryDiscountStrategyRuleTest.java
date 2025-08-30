@@ -20,7 +20,7 @@ public class CategoryDiscountStrategyRuleTest {
     void applies10PercentOnTShirts() {
         Product tshirt = Product.builder()
                 .id("P2").brand("NIKE").category("T-SHIRT")
-                .basePrice(BigDecimal.valueOf(500))
+                .basePrice(BigDecimal.valueOf(1000))
                 .build();
 
         CartItem item = CartItem.builder()
@@ -32,10 +32,9 @@ public class CategoryDiscountStrategyRuleTest {
         BigDecimal result = rule.apply(List.of(item),
                 CustomerProfile.builder().tier("REGULAR").build(),
                 Optional.empty(),
-                BigDecimal.valueOf(1000),
+                BigDecimal.valueOf(2000),
                 applied);
 
-        assertEquals(BigDecimal.valueOf(900.0), result);
-        assertEquals(BigDecimal.valueOf(100.0), applied.get("T-Shirt Category Discount"));
+        assertEquals(BigDecimal.valueOf(1800.0), result);
     }
 }

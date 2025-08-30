@@ -40,7 +40,7 @@ public class DiscountServiceIntegrationTest {
         PaymentInfo payment = PaymentInfo.builder().bankName("ICICI").method("CARD").build();
 
         DiscountedPrice result = discountService.calculateCartDiscounts(
-                List.of(item), customer, Optional.of(payment));
+                List.of(item), customer, Optional.of(payment),"SUPER39");
 
         assertTrue(result.getAppliedDiscounts().size() >= 3);
         assertTrue(result.getFinalPrice().compareTo(result.getOriginalPrice()) < 0);
@@ -50,7 +50,7 @@ public class DiscountServiceIntegrationTest {
     void returnsSamePriceForEmptyCart() {
         CustomerProfile customer = CustomerProfile.builder().tier("REGULAR").build();
         DiscountedPrice result = discountService.calculateCartDiscounts(
-                List.of(), customer, Optional.empty());
+                List.of(), customer, Optional.empty(), "");
 
         assertEquals(BigDecimal.ZERO.setScale(2), result.getOriginalPrice());
         assertEquals(BigDecimal.ZERO.setScale(2), result.getFinalPrice());

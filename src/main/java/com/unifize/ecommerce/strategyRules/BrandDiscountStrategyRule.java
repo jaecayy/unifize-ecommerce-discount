@@ -16,18 +16,18 @@ public class BrandDiscountStrategyRule implements DiscountStrategyRule{
         BigDecimal discountTotal = BigDecimal.ZERO;
 
         for(CartItem item : cartItems) {
-            if (DiscountConstants.PUMA.equalsIgnoreCase(item.getProduct().getBrand())) {
+            String brand = item.getProduct().getBrand().toUpperCase();
+            if (DiscountConstants.BRAND_DISCOUNTS.containsKey(brand)) {
+                double percent = DiscountConstants.BRAND_DISCOUNTS.get(brand);
                 BigDecimal itemTotal = item.getProduct().getBasePrice()
                         .multiply(BigDecimal.valueOf(item.getQuantity()));
-                BigDecimal discount = itemTotal.multiply(BigDecimal.valueOf(DiscountConstants.PUMA_DISCOUNT_PERCENT));
+                BigDecimal discount = itemTotal.multiply(BigDecimal.valueOf(percent));
                 discountTotal = discountTotal.add(discount);
+                appliedDiscounts.merge(brand + " Brand Discount", discount, BigDecimal::add);
+                currentTotal = currentTotal.subtract(discount);
             }
         }
 
-        if (discountTotal.compareTo(BigDecimal.ZERO) > 0) {
-            appliedDiscounts.merge("PUMA Brand Discount", discountTotal, BigDecimal::add);
-            return currentTotal.subtract(discountTotal);
-        }
         return currentTotal;
     }
 }

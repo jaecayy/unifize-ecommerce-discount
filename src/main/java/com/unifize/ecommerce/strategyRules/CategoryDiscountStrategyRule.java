@@ -16,18 +16,18 @@ public class CategoryDiscountStrategyRule implements DiscountStrategyRule{
         BigDecimal discountTotal = BigDecimal.ZERO;
 
         for (CartItem item : cartItems) {
-            if (DiscountConstants.CATEGORY_TSHIRT.equalsIgnoreCase(item.getProduct().getCategory())) {
+            String category = item.getProduct().getCategory().toUpperCase();
+            if (DiscountConstants.CATEGORY_DISCOUNTS.containsKey(category)) {
+                double percent = DiscountConstants.CATEGORY_DISCOUNTS.get(category);
                 BigDecimal itemTotal = item.getProduct().getBasePrice()
                         .multiply(BigDecimal.valueOf(item.getQuantity()));
-                BigDecimal discount = itemTotal.multiply(BigDecimal.valueOf(DiscountConstants.TSHIRT_DISCOUNT_PERCENT));
+                BigDecimal discount = itemTotal.multiply(BigDecimal.valueOf(percent));
                 discountTotal = discountTotal.add(discount);
+                appliedDiscounts.merge(category + " Category Discount", discount, BigDecimal::add);
+                currentTotal = currentTotal.subtract(discount);
             }
         }
 
-        if (discountTotal.compareTo(BigDecimal.ZERO) > 0) {
-            appliedDiscounts.merge("T-Shirt Category Discount", discountTotal, BigDecimal::add);
-            return currentTotal.subtract(discountTotal);
-        }
         return currentTotal;
     }
 }
